@@ -57,6 +57,26 @@ class BridgeMonitorUiContractTests(unittest.TestCase):
         self.assertIn("FreshTickRequired = false;", source)
         self.assertIn('FreshTickRequired) return "지연";', source)
 
+    def test_receive_and_forward_errors_have_independent_ownership(self):
+        source = self.source
+        receive = source[source.index("private void ReceiveSpot("):source.index("private SpotTickSnapshot BuildSpotTickSnapshot(")]
+        forward = source[source.index("private async Task SendSpotTickAsync("):source.index("private void UpdateDomesticStatus(")]
+        state = source[source.index("private sealed class SpotStreamState"):source.index("private sealed class SpotTickSnapshot")]
+
+        self.assertIn('state.StreamError = "";', receive)
+        self.assertIn('state.StreamError = ex.GetType().Name + " - " + ex.Message;', receive)
+        self.assertNotIn("state.ForwardError =", receive)
+
+        self.assertIn('state.ForwardError = "";', forward)
+        self.assertIn("state.ForwardError = forwardError;", forward)
+        self.assertNotIn("state.StreamError =", forward)
+        self.assertNotIn('state.LastError = "";', forward)
+
+        self.assertIn('public string StreamError { get; set; } = "";', state)
+        self.assertIn('public string ForwardError { get; set; } = "";', state)
+        self.assertIn("if (!string.IsNullOrEmpty(StreamError)) return StreamError;", state)
+        self.assertIn('return ForwardError ?? "";', state)
+
     def test_native_status_uses_semantic_session_and_valid_business_clock(self):
         source = self.source
         self.assertIn("payload.dashboard_market_states", source)

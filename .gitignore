@@ -1,9 +1,24 @@
-# Local runtime artifacts
+# Generated packaged runtimes / native build outputs
+/MarketAI.exe
+/InvestmentLocalSuite.exe
+/KisKospi200Bridge.exe
+/KisKospi200Bridge.exe.config
+/AxInterop.ITGExpertCtlLib.dll
+/Interop.ITGExpertCtlLib.dll
+/_internal/
+/_suite_internal/
+/_runtime-backup/
+KisKospi200Bridge/bin/
+KisKospi200Bridge/obj/
+
+# Python test/cache artifacts
 __pycache__/
+.pytest_cache/
 *.pyc
 *.pyo
-# NOTE: *.pyd is intentionally NOT ignored. PyInstaller onedir runtimes
-# require native .pyd extensions under _internal/ and _suite_internal/.
+
+# Keep native extension modules trackable. PyInstaller onedir runtimes may
+# require .pyd files under _internal/ and _suite_internal/.
 
 # Local Market AI SQLite runtime database
 /db/market_signal.db

@@ -922,6 +922,7 @@ last_forwarded_tick_count
 불변조건:
 
 - Bridge 전체 heartbeat가 살아 있어도 특정 ticker `subscribed=false` 또는 `last_error`가 있으면 **그 ticker만** stale/unusable로 만든다.
+- Native Bridge 내부에서는 `SC_R` 구독/수신 오류와 Market AI HTTP 전송 오류를 별도 상태로 소유한다. `last_error`는 수신·구독 오류를 우선하고, 없을 때 전송 오류를 노출한다. **전송 성공은 전송 오류만 해제하며, 자신보다 뒤에 발생한 수신 오류를 지우거나 UI를 정상 상태로 덮어쓰지 않는다.** 수신 오류는 새 정상 `SC_R` 수신에서만 해제한다.
 - 정상 ticker는 다른 ticker 장애 때문에 fallback하지 않는다.
 - stream이 unhealthy로 전환되면 해당 ticker는 **새 실제 tick 필요** 상태가 된다.
 - 이후 heartbeat에서 `subscribed=true`로 돌아왔다는 사실만으로 장애 전 same-day quote를 다시 usable로 만들지 않는다. 장애 lifecycle에서 `_fresh_tick_required`가 설정된 경우에는 장마감 durable snapshot도 승격하지 않고 새 `SC_R` tick을 실제 수신한 뒤에만 live/closed 복귀가 가능하다. 단순 Market AI 프로세스 재시작처럼 이전 stream 장애 상태가 없는 경우에는 위의 closed durable recovery contract를 적용할 수 있다.

@@ -191,14 +191,21 @@ def test_clean_dev_helper_removes_only_generated_artifacts_and_preserves_db_data
 
 def test_gitignore_blocks_generated_runtime_without_ignoring_frozen_pyd_extensions():
     source = GITIGNORE.read_text(encoding="utf-8")
+    rules = {
+        line.strip()
+        for line in source.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    }
     for token in (
         "/MarketAI.exe",
         "/InvestmentLocalSuite.exe",
         "/KisKospi200Bridge.exe",
+        "/KisKospi200Bridge.exe.config",
         "/AxInterop.ITGExpertCtlLib.dll",
         "/Interop.ITGExpertCtlLib.dll",
         "/_internal/",
         "/_suite_internal/",
+        "/_runtime-backup/",
         "KisKospi200Bridge/bin/",
         "KisKospi200Bridge/obj/",
         "__pycache__/",
@@ -206,9 +213,9 @@ def test_gitignore_blocks_generated_runtime_without_ignoring_frozen_pyd_extensio
         "*.pyc",
         "*.pyo",
     ):
-        assert token in source
-    assert "*.py[cod]" not in source
-    assert "*.pyd" not in source
+        assert token in rules
+    assert "*.py[cod]" not in rules
+    assert "*.pyd" not in rules
 
 
 def test_all_three_builds_clean_before_build_and_verify_clean_state_afterward():

@@ -1471,17 +1471,17 @@ namespace KisKospi200Bridge
             {
                 control.RequestRealData(state.Service, state.Code);
                 state.Subscribed = true;
-                state.LastError = "";
+                state.StreamError = "";
                 if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "구독 대기");
                 if (state.UiService != null) state.UiService.Text = state.Symbol == "INDEX:KOSPI" ? "정규장" : "-";
                 AppendLog("SUBSCRIBE " + state.Name + " " + state.Service + " / " + state.Code + " - ReceiveRealData 대기");
             }
             catch (Exception ex)
             {
-                state.LastError = ex.GetType().Name + " - " + ex.Message;
+                state.StreamError = ex.GetType().Name + " - " + ex.Message;
                 if (state.TickCount > 0) state.FreshTickRequired = true;
                 if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "구독 오류");
-                AppendLog("ERROR " + state.Name + " RequestRealData: " + state.LastError);
+                AppendLog("ERROR " + state.Name + " RequestRealData: " + state.StreamError);
             }
         }
 
@@ -1927,7 +1927,7 @@ namespace KisKospi200Bridge
                 state.TickCount++;
                 state.LastTickUtc = DateTime.UtcNow;
                 state.CachedObservedUtc = null;
-                state.LastError = "";
+                state.StreamError = "";
                 state.FreshTickRequired = false;
                 state.LastBusinessTime = NormalizeBusinessTime(time) ?? "";
                 state.LastPriceText = price ?? "";
@@ -1950,9 +1950,9 @@ namespace KisKospi200Bridge
             }
             catch (Exception ex)
             {
-                state.LastError = ex.GetType().Name + " - " + ex.Message;
+                state.StreamError = ex.GetType().Name + " - " + ex.Message;
                 if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "수신 오류");
-                AppendLog("ERROR " + state.Name + " ReceiveRealData: " + state.LastError);
+                AppendLog("ERROR " + state.Name + " ReceiveRealData: " + state.StreamError);
                 UpdateDomesticStatus();
             }
         }
@@ -2003,11 +2003,13 @@ namespace KisKospi200Bridge
                     if (!response.IsSuccessStatusCode)
                     {
                         var body = await response.Content.ReadAsStringAsync();
-                        state.LastError = "HTTP " + (int)response.StatusCode + " " + body;
+                        var forwardError = "HTTP " + (int)response.StatusCode + " " + body;
+                        state.ForwardError = forwardError;
                         SafeUi(() =>
                         {
-                            if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "AI 전송 오류");
-                            AppendLog("MARKET AI ERROR " + state.Name + " " + state.LastError);
+                            if (state.UiStatus != null && string.IsNullOrEmpty(state.StreamError))
+                                SetStatusBadge(state.UiStatus, "AI 전송 오류");
+                            AppendLog("MARKET AI ERROR " + state.Name + " " + forwardError);
                         });
                         return;
                     }
@@ -2015,21 +2017,26 @@ namespace KisKospi200Bridge
 
                 state.ForwardSuccessCount++;
                 state.LastForwardedTickCount = tick.TickCount;
-                state.LastError = "";
+                state.ForwardError = "";
                 SafeUi(() =>
                 {
-                    if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "수신 중");
+                    if (state.UiStatus != null &&
+                        string.IsNullOrEmpty(state.StreamError) &&
+                        string.IsNullOrEmpty(state.ForwardError))
+                        SetStatusBadge(state.UiStatus, "수신 중");
                 });
                 if (state.ForwardSuccessCount <= 3 || state.ForwardSuccessCount % 50 == 0)
                     SafeUi(() => AppendLog("MARKET AI OK " + state.Name + " tick=" + tick.TickCount + " price=" + tick.Price.ToString("0.00", CultureInfo.InvariantCulture)));
             }
             catch (Exception ex)
             {
-                state.LastError = ex.GetType().Name + " - " + ex.Message;
+                var forwardError = ex.GetType().Name + " - " + ex.Message;
+                state.ForwardError = forwardError;
                 SafeUi(() =>
                 {
-                    if (state.UiStatus != null) SetStatusBadge(state.UiStatus, "AI 전송 오류");
-                    AppendLog("MARKET AI ERROR " + state.Name + " " + state.LastError);
+                    if (state.UiStatus != null && string.IsNullOrEmpty(state.StreamError))
+                        SetStatusBadge(state.UiStatus, "AI 전송 오류");
+                    AppendLog("MARKET AI ERROR " + state.Name + " " + forwardError);
                 });
             }
             finally
@@ -2796,7 +2803,16 @@ namespace KisKospi200Bridge
             public DateTime LastForwardAttemptUtc { get; set; } = DateTime.MinValue;
             public DateTime? LastTickUtc { get; set; }
             public DateTime? CachedObservedUtc { get; set; }
-            public string LastError { get; set; } = "";
+            public string StreamError { get; set; } = "";
+            public string ForwardError { get; set; } = "";
+            public string LastError
+            {
+                get
+                {
+                    if (!string.IsNullOrEmpty(StreamError)) return StreamError;
+                    return ForwardError ?? "";
+                }
+            }
             public bool FreshTickRequired { get; set; }
             public string MarketState { get; set; } = "unknown";
             public string LastBusinessTime { get; set; } = "";

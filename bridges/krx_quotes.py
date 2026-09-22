@@ -648,23 +648,6 @@ class KrxQuoteService:
                 previous = self._subscription_health.get(ticker)
                 quote = self._quotes.get(ticker)
                 unhealthy = not health.subscribed or bool(health.last_error)
-
-                # Cross-request causal ordering: an accepted SC_R quote can be newer
-                # than an *unhealthy* heartbeat that happened to arrive later at the
-                # server.  A healthy heartbeat is harmless/useful even when older than
-                # the latest quote, so keep it as subscription evidence.  Do not let
-                # only the causally stale unhealthy item overwrite a newer state or
-                # re-arm freshness.
-                if unhealthy and self._health_snapshot_predates_quote(
-                    health,
-                    quote,
-                    reported_at=current,
-                ):
-                    if previous is not None:
-                        effective_health[ticker] = previous
-                    continue
-
-                effective_health[ticker] = health
                 counter_reset = (
                     previous is not None
                     and (
@@ -672,6 +655,30 @@ class KrxQuoteService:
                         or health.forward_success_count < previous.forward_success_count
                     )
                 )
+
+                # Counter regression is a new Bridge/stream epoch, not an older
+                # heartbeat from the previous epoch.  Detect that boundary before
+                # applying same-epoch causal ordering; otherwise a fast restart with
+                # an immediate subscription/read error can be mistaken for a stale
+                # pre-quote heartbeat simply because its counters restarted at zero.
+                #
+                # For a stable epoch, an accepted SC_R quote can still be newer than
+                # an *unhealthy* heartbeat that arrives later at the server.  Preserve
+                # that pre-ack race defence only when no epoch reset was observed.
+                if (
+                    unhealthy
+                    and not counter_reset
+                    and self._health_snapshot_predates_quote(
+                        health,
+                        quote,
+                        reported_at=current,
+                    )
+                ):
+                    if previous is not None:
+                        effective_health[ticker] = previous
+                    continue
+
+                effective_health[ticker] = health
                 if counter_reset:
                     # A fast Bridge/stream restart can happen inside the heartbeat
                     # stale window, so `bridge_connected` may never visibly flip to

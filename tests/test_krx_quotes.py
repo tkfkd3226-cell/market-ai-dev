@@ -1529,6 +1529,79 @@ class KrxQuoteServiceTests(unittest.TestCase):
         self.assertEqual(reconnect["fresh_tick_required"], [])
         self.assertNotIn("009150", service.status()["fresh_tick_required"])
 
+    def test_fast_bridge_epoch_reset_with_immediate_error_stales_old_quote(self):
+        service = self.make_service()
+        service.request_universe(["009150"])
+        service.ingest_quote(
+            ticker="009150",
+            price=150000,
+            change_pct=0.1,
+            business_time="100000",
+            cumulative_volume=10,
+            ask1=None,
+            bid1=None,
+            bridge_tick_count=10,
+            bridge_sent_at=OPEN_NOW,
+            observed_at=OPEN_NOW,
+        )
+        service.update_subscription_health(
+            [{
+                "ticker": "009150",
+                "subscribed": True,
+                "last_tick_at": OPEN_NOW,
+                "tick_count": 10,
+                "forward_success_count": 3,
+                "last_forwarded_tick_count": 10,
+                "last_error": None,
+            }],
+            reported_at=OPEN_NOW + timedelta(seconds=1),
+        )
+
+        # The Bridge restarts inside the heartbeat-stale window and its first
+        # subscription attempt fails. Counter regression is a new stream epoch,
+        # so this unhealthy heartbeat must not be discarded as a pre-quote snapshot.
+        service.update_subscription_health(
+            [{
+                "ticker": "009150",
+                "subscribed": False,
+                "last_tick_at": None,
+                "tick_count": 0,
+                "forward_success_count": 0,
+                "last_forwarded_tick_count": None,
+                "last_error": "resubscribe failed",
+            }],
+            reported_at=OPEN_NOW + timedelta(seconds=5),
+        )
+
+        failed = service.quote_snapshot(
+            ["009150"], bridge_connected=True, now=OPEN_NOW + timedelta(seconds=5)
+        )["items"][0]
+        self.assertFalse(failed["usable"])
+        self.assertEqual(failed["state"], "stale")
+        self.assertEqual(failed["subscription_state"], "not_subscribed")
+        self.assertEqual(failed["subscription_error"], "resubscribe failed")
+        self.assertIn("009150", service.status()["fresh_tick_required"])
+
+        # A healthy heartbeat in the new epoch is not enough to revive the quote;
+        # an actual new SC_R tick must clear the freshness requirement.
+        service.update_subscription_health(
+            [{
+                "ticker": "009150",
+                "subscribed": True,
+                "last_tick_at": None,
+                "tick_count": 0,
+                "forward_success_count": 0,
+                "last_forwarded_tick_count": None,
+                "last_error": None,
+            }],
+            reported_at=OPEN_NOW + timedelta(seconds=6),
+        )
+        heartbeat_only = service.quote_snapshot(
+            ["009150"], bridge_connected=True, now=OPEN_NOW + timedelta(seconds=6)
+        )["items"][0]
+        self.assertFalse(heartbeat_only["usable"])
+        self.assertEqual(heartbeat_only["state"], "stale")
+
     def test_fast_bridge_epoch_reset_requires_new_tick_even_without_stale_heartbeat_gap(self):
         service = self.make_service()
         service.request_universe(["009150"])

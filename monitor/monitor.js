@@ -1517,16 +1517,10 @@ function publishEmbeddedContentSize() {
 
   embedSizeFrame = window.requestAnimationFrame(() => {
     embedSizeFrame = 0;
-    const body = document.body;
-    const root = document.documentElement;
     const height = Math.ceil(Math.max(
       dom.shell.scrollHeight,
       dom.shell.offsetHeight,
       dom.shell.getBoundingClientRect().height,
-      body?.scrollHeight || 0,
-      body?.offsetHeight || 0,
-      root?.scrollHeight || 0,
-      root?.offsetHeight || 0,
     ));
     if (height <= 0) {
       return;

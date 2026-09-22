@@ -561,7 +561,7 @@ Build는 파일 존재보다 **재현성과 운영 안전성**을 평가한다.
 - 무관한 port owner를 강제 종료하지 않는가
 - runtime component가 clean replacement 되는가
 - deploy verify와 rollback이 old/new 혼합 상태를 방지하는가
-- 운영 DB·`.env`·README 등 mutable/non-component 자원을 덮어쓰지 않는가
+- 운영 DB·`.env`·로그 등 mutable/non-component 자원을 덮어쓰지 않는가
 - 최종 SUCCESS가 deploy/verify/clean-dev보다 먼저 나오지 않는가
 - 정상 build 뒤 dev root에 재생성 가능한 runtime/bin/obj residue가 contract 위반으로 남지 않는가
 

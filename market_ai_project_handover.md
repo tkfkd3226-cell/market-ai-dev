@@ -122,7 +122,6 @@ market-ai\
 │  └─ market_signal.db
 ├─ tools\
 │  └─ close-efriend-tray.ps1
-├─ .gitignore
 ├─ AxInterop.ITGExpertCtlLib.dll
 ├─ Interop.ITGExpertCtlLib.dll
 ├─ InvestmentLocalSuite.exe
@@ -176,6 +175,7 @@ market-ai-dev\
 │  ├─ runtime-stop.ps1
 │  └─ run-tests.py
 ├─ .env.example
+├─ .gitattributes
 ├─ .gitignore
 ├─ README.md
 ├─ app.py
@@ -221,6 +221,8 @@ __pycache__/
 `tools/clean-dev-artifacts.ps1`가 위 항목을 제거하고 `-VerifyOnly`로 clean 상태를 검증한다. 세 공식 build script는 build 전 cleanup과 성공 직전 clean verification을 수행하므로 **정상 SUCCESS 후 dev root에 운영 runtime이 남지 않는 것이 contract**다.
 
 `.gitignore`도 위 runtime/build/cache의 재유입을 차단한다. 단, frozen runtime의 native extension까지 잘못 제외하지 않도록 `*.pyd` 같은 광범위 ignore는 사용하지 않는다.
+
+`.gitattributes`는 `* text=auto`로 Git index의 텍스트 줄바꿈만 정규화해 Windows의 CRLF/LF 차이만으로 dirty 상태가 생기는 것을 줄인다. `*.ico`·`*.zip`·`*.pdf`는 binary로 지정해 text normalization 대상에서 제외한다.
 
 `db/market_signal.db`와 `db/dashboard_quote_universe.json`은 generated executable이 아니라 개발 중 생길 수 있는 mutable state다. build/test prerequisite가 아니며 `clean-dev-artifacts.ps1`가 삭제하지 않는다. 특히 `db/market_signal.db`는 누적 개발 데이터일 수 있으므로 자동 cleanup 대상으로 만들지 않는다. `dashboard_quote_universe.json`은 local transient state로 `.gitignore` 대상이다.
 
@@ -307,7 +309,6 @@ KisBridge
 ```text
 db/market_signal.db
 .env                 # 실제 사용하는 경우
-.gitignore
 InvestmentLocalSuite.ico
 tools/close-efriend-tray.ps1
 start-local-server.log

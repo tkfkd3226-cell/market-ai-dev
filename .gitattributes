@@ -1,0 +1,7 @@
+# Normalize text in the index without forcing a working-tree EOL on Windows.
+* text=auto
+
+# Binary/reference assets must never receive text normalization.
+*.ico binary
+*.zip binary
+*.pdf binary

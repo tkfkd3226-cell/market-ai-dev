@@ -812,7 +812,7 @@ def build_signal(
     if not up_close_state["available"]:
         up_close_score = 50.0
 
-    # Legacy DB/API compatibility only; phase 3 removes this heuristic from UI.
+    # Legacy DB/API compatibility only; the current UI does not consume this heuristic.
     agreement_values = [direction for key, direction in (
         ("kospi", kospi_direction), ("semiconductors", semi_direction),
         ("gap_up", gap_direction), ("up_close", up_close_direction),

@@ -10,6 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 TEST_REQUIREMENTS = ROOT / "requirements-test.txt"
 _REQUIREMENT_NAME = re.compile(r"^([A-Za-z0-9_.-]+)")
+_OPTIONAL_SOURCE_QA_DISTRIBUTIONS = {"yfinance"}
 
 
 def _distribution_names(path: Path, seen: set[Path] | None = None) -> list[str]:
@@ -46,15 +47,28 @@ def _missing_distributions() -> list[str]:
 
 def main() -> int:
     missing = _missing_distributions()
-    if missing:
+    optional_missing = [
+        name for name in missing
+        if name.lower() in _OPTIONAL_SOURCE_QA_DISTRIBUTIONS
+    ]
+    required_missing = [name for name in missing if name not in optional_missing]
+
+    if required_missing:
         print("Market AI test dependencies are incomplete.", file=sys.stderr)
-        print("Missing: " + ", ".join(missing), file=sys.stderr)
+        print("Missing: " + ", ".join(required_missing), file=sys.stderr)
         print("Install them with:", file=sys.stderr)
         print(
             f'  "{sys.executable}" -m pip install -r "{TEST_REQUIREMENTS}"',
             file=sys.stderr,
         )
         return 2
+
+    if optional_missing:
+        print(
+            "Market AI source QA: optional dependency unavailable; "
+            "yfinance-dependent tests will be skipped (no install attempt).",
+            flush=True,
+        )
 
     command = [sys.executable, "-m", "pytest", *sys.argv[1:]]
     return subprocess.call(command, cwd=ROOT)

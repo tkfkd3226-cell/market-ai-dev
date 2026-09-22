@@ -2,8 +2,14 @@ from datetime import datetime, timedelta, timezone
 import json
 from unittest.mock import patch
 
-import pandas as pd
 import pytest
+
+pytest.importorskip(
+    "yfinance",
+    reason="optional source-QA dependency unavailable; install is not attempted automatically",
+)
+
+import pandas as pd
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session
 

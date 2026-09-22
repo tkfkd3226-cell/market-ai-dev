@@ -650,7 +650,9 @@ python -m pip install -r requirements-test.txt
 python tools/run-tests.py -q
 ```
 
-`tools/run-tests.py`가 dependency 누락을 보고하면 제품 코드 FAIL로 채점하지 않고 환경을 먼저 완성한다. `yfinance` 같은 runtime dependency를 fake module/stub으로 대체해 전체 PASS를 주장하지 않는다. Windows frozen runtime의 exact lock은 build contract가 별도로 소유한다.
+`tools/run-tests.py`가 일반 필수 dependency 누락을 보고하면 제품 코드 FAIL로 채점하지 않고 환경을 먼저 완성한다. 단, **source 평가 환경에서 `yfinance`만 누락된 경우에는 설치를 시도하지 않는다.** 러너는 나머지 테스트를 계속 실행하고 `yfinance` 의존 테스트는 명시적으로 SKIP 처리한다. 이 SKIP은 제품 감점 사유로 사용하지 않으며, 해당 영역은 관련 소스 흐름과 비의존 회귀 테스트를 직접 확인해 보완한다. `yfinance`를 fake module/stub으로 대체해 전체 PASS를 주장하지 않는다. Windows frozen runtime의 exact lock은 build contract가 별도로 소유한다.
+
+평가자는 `yfinance` 누락이 이미 확인된 동일 source-QA 환경에서 `pip install yfinance` 또는 `pip install -r requirements-test.txt`를 반복 시도하지 않는다. 새 dependency 변경이나 runtime 환경 변경 증거가 있을 때만 환경 준비 여부를 다시 확인한다.
 
 ## 14.3 Windows 실기
 

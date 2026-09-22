@@ -968,7 +968,8 @@ html.monitor-embedded .monitor-header__tools {
   body {
     width: 100%;
     min-width: 0;
-    min-height: 100%;
+    min-height: 100vh;
+    overflow: visible;
     background: var(--color-bg);
     color: var(--color-text);
     -webkit-print-color-adjust: exact;
@@ -978,8 +979,14 @@ html.monitor-embedded .monitor-header__tools {
   .monitor-shell {
     width: 100%;
     max-width: none;
+    min-height: 100vh;
     margin: 0;
+    overflow: visible;
     background: var(--color-bg);
+  }
+
+  .holdings-section {
+    overflow: visible;
   }
 
   html.monitor-embedded .monitor-header {

@@ -971,7 +971,7 @@ Bridge는 KOSPI200 선물의 월물/session route에 대해서는 Market AI 서�
 - Desktop 보유종목 5열, 1100px 이하 3열, Phone 2열을 유지한다. Phone에서는 K200/KOSPI와 보유종목 모두 2열이며 420px 이하에서도 1열로 되돌리지 않는다.
 - Phone 보유종목 카드는 종목코드를 숨기고, 상태 badge를 카드 우측 상단에 고정하며, 종목명은 최대 2줄까지 표시한다. Phone header의 시스템 상태는 상태 텍스트만 유지하고 실시간 clock과 status dot은 숨긴다.
 - Phone shell의 화면 바깥 padding은 0으로 두고, 카드/grid 자식은 부모 폭을 밀어내지 않도록 축소 가능해야 한다. 긴 종목명·가격·상태는 카드 경계 밖으로 overflow하지 않는다.
-- Web/Tablet은 viewport의 남는 높이 때문에 카드 row를 늘리지 않고 콘텐츠 자연 높이를 유지한다. iframe으로 열리면 부모 Dashboard가 compact modal 높이를 맞출 수 있도록 콘텐츠 높이를 전달한다.
+- Web/Tablet은 viewport의 남는 높이 때문에 카드 row를 늘리지 않고 콘텐츠 자연 높이를 유지한다. iframe으로 열리면 부모 Dashboard가 compact modal 높이를 맞출 수 있도록 shell뿐 아니라 document 전체 높이를 전달한다. Print 전환에서도 높이를 다시 게시하고 `monitor.css`는 overflow/최소 page height를 해제·복원해 부모가 percentage height chain 없이 전체 내용을 인쇄할 수 있게 한다.
 - embedded modal에서는 Dashboard의 외부 닫기 버튼과 Monitor theme toggle이 겹치지 않게 header tool 영역을 확보한다.
 
 Monitor 정적 3파일만 수정한 운영 hotfix는 **MarketAI.exe를 재빌드하지 않고** 실행 중인 Market AI를 종료한 뒤 운영 `market-ai\_internal\monitor\`의 동일 3파일만 교체할 수 있다. 개발 Source of Truth인 `market-ai-dev/monitor/`에도 같은 변경을 남겨 다음 정식 build에 포함되게 한다. `app.py`, backend Python, build contract가 함께 바뀐 경우에는 이 fast-path를 쓰지 않고 `build-market-ai.ps1`로 전체 runtime 세트를 다시 만든다.

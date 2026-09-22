@@ -1,0 +1,13 @@
+# Local runtime artifacts
+__pycache__/
+*.pyc
+*.pyo
+# NOTE: *.pyd is intentionally NOT ignored. PyInstaller onedir runtimes
+# require native .pyd extensions under _internal/ and _suite_internal/.
+
+# Local Market AI SQLite runtime database
+/db/market_signal.db
+/db/dashboard_quote_universe.json
+
+# Local environment / runtime files
+/.env

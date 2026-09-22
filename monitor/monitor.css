@@ -1,0 +1,926 @@
+/* =========================================================
+   1. Tokens & Theme
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+
+  --font-family:
+    Pretendard,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "Noto Sans KR",
+    Arial,
+    sans-serif;
+
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-md: 13px;
+  --font-lg: 16px;
+  --font-xl: 24px;
+  --font-2xl: 30px;
+
+  --line-tight: 1.2;
+  --line-normal: 1.45;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+
+  --border-width: 1px;
+  --focus-ring-width: 2px;
+
+  --color-bg: #f5f7fa;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+  --color-border: #dce2e8;
+
+  --color-text: #18212b;
+  --color-text-muted: #697586;
+
+  --color-positive: #d92d20;
+  --color-negative: #1570ef;
+
+  --color-live: #16803c;
+  --color-live-bg: #edf9f0;
+
+  --color-closed: #596579;
+  --color-closed-bg: #f0f2f5;
+
+  --color-warming: #9a6700;
+  --color-warming-bg: #fff8df;
+
+  --color-stale: #b54708;
+  --color-stale-bg: #fff4e5;
+
+  --color-error: #c62828;
+  --color-error-bg: #fff0f0;
+
+  --shadow-card: 0 1px 3px rgb(16 24 40 / 5%);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #11161d;
+  --color-surface: #181f28;
+  --color-surface-muted: #202833;
+  --color-border: #303a47;
+
+  --color-text: #edf1f5;
+  --color-text-muted: #98a4b3;
+
+  --color-positive: #ff6b6b;
+  --color-negative: #5da4ff;
+
+  --color-live: #57c878;
+  --color-live-bg: #173322;
+
+  --color-closed: #b2bcc8;
+  --color-closed-bg: #29313b;
+
+  --color-warming: #f0c554;
+  --color-warming-bg: #3a3117;
+
+  --color-stale: #f5a95c;
+  --color-stale-bg: #3d2917;
+
+  --color-error: #ff7777;
+  --color-error-bg: #3c2020;
+
+  --shadow-card: none;
+}
+
+
+/* =========================================================
+   2. Reset & Base
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-bg);
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+
+  font-family: var(--font-family);
+  font-size: var(--font-md);
+  line-height: var(--line-normal);
+
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd {
+  margin: 0;
+}
+
+strong {
+  font-weight: 700;
+}
+
+time,
+[data-role="price"],
+[data-role="change"],
+.summary-item dd {
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   3. Shell & Header
+   ========================================================= */
+
+.monitor-shell {
+  width: min(1440px, 100%);
+
+  margin: 0 auto;
+  padding: var(--space-4);
+
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  align-content: start;
+  gap: var(--space-3);
+}
+
+.monitor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  padding: 0 var(--space-1);
+}
+
+.monitor-header h1 {
+  font-size: var(--font-lg);
+  line-height: var(--line-tight);
+  font-weight: 700;
+}
+
+.monitor-header__tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+}
+
+/* Embedded layout keeps the structural --space-1 top inset. Close-button alignment belongs to the header
+   itself so optical correction never shifts the market cards/footer with the title row. */
+html.monitor-embedded .monitor-shell {
+  padding-top: var(--space-1);
+}
+
+html.monitor-embedded .monitor-header {
+  transform: translateY(3px);
+}
+
+/* Dashboard embedded mode reserves the host modal close-button lane; standalone /monitor/ keeps native header spacing. */
+html.monitor-embedded .monitor-header__tools {
+  padding-right: calc(32px + var(--space-2));
+}
+
+.system-status,
+.connection-state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.system-clock {
+  min-width: 58px;
+  text-align: right;
+}
+
+.theme-toggle {
+  width: 32px;
+  height: 32px;
+
+  display: inline-grid;
+  place-items: center;
+
+  padding: 0;
+
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-sm);
+
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+}
+
+.theme-toggle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-negative);
+  outline-offset: var(--focus-ring-width);
+}
+
+.theme-toggle__icon {
+  line-height: 1;
+}
+
+
+/* =========================================================
+   4. Common Components
+   ========================================================= */
+
+.market-card,
+.holding-card,
+.holdings-section,
+.monitor-footer {
+  border: var(--border-width) solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.market-card,
+.holding-card {
+  border-radius: var(--radius-md);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+  min-height: 24px;
+
+  padding: var(--space-1) var(--space-2);
+
+  border-radius: var(--radius-pill);
+
+  color: var(--status-color, var(--color-warming));
+  background: var(--status-bg, var(--color-warming-bg));
+
+  font-size: var(--font-xs);
+  line-height: 1;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  flex: 0 0 7px;
+
+  border-radius: 50%;
+  background: var(--status-color, var(--color-warming));
+}
+
+
+/* =========================================================
+   5. Status
+   ========================================================= */
+
+[data-status="live"],
+[data-status="extended"] {
+  --status-color: var(--color-live);
+  --status-bg: var(--color-live-bg);
+}
+
+[data-status="closed"] {
+  --status-color: var(--color-closed);
+  --status-bg: var(--color-closed-bg);
+}
+
+[data-status="warming"] {
+  --status-color: var(--color-warming);
+  --status-bg: var(--color-warming-bg);
+}
+
+[data-status="stale"] {
+  --status-color: var(--color-stale);
+  --status-bg: var(--color-stale-bg);
+}
+
+[data-status="error"] {
+  --status-color: var(--color-error);
+  --status-bg: var(--color-error-bg);
+}
+
+[data-trend="positive"] {
+  color: var(--color-positive);
+}
+
+[data-trend="negative"] {
+  color: var(--color-negative);
+}
+
+[data-trend="flat"] {
+  color: var(--color-text-muted);
+}
+
+
+/* =========================================================
+   6. Market Cards
+   ========================================================= */
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.market-card {
+  min-width: 0;
+
+  padding: var(--space-4);
+
+  display: grid;
+  gap: var(--space-4);
+}
+
+.market-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.market-card__title {
+  font-size: var(--font-lg);
+  line-height: var(--line-tight);
+}
+
+.market-card__subtitle {
+  margin-top: var(--space-1);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.market-card__value {
+  min-width: 0;
+
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.market-card__value strong {
+  overflow: hidden;
+
+  font-size: var(--font-2xl);
+  line-height: var(--line-tight);
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.market-card__value span {
+  font-size: var(--font-sm);
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.metric-list {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.metric-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.metric-row dd {
+  overflow: hidden;
+
+  color: var(--color-text);
+
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   7. Holdings
+   ========================================================= */
+
+.holdings-section {
+  min-width: 0;
+
+  overflow: hidden;
+
+  border-radius: var(--radius-md);
+}
+
+.holdings-summary {
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  padding: var(--space-3) var(--space-4);
+
+  border-bottom: var(--border-width) solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.holdings-summary h2 {
+  flex: 0 0 auto;
+
+  font-size: var(--font-md);
+  line-height: var(--line-tight);
+}
+
+.summary-list {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+
+  min-width: 0;
+}
+
+.summary-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-1);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+
+  white-space: nowrap;
+}
+
+.summary-item dd {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.summary-item[data-status] dd {
+  color: var(--status-color, var(--color-text));
+}
+
+.holdings-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: var(--space-3);
+
+  padding: var(--space-3);
+}
+
+.holding-card {
+  min-width: 0;
+  min-height: 142px;
+
+  padding: var(--space-3);
+
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-3);
+}
+
+.holding-card__header {
+  min-width: 0;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.holding-card__identity {
+  min-width: 0;
+}
+
+.holding-card__identity h3 {
+  overflow: hidden;
+
+  font-size: var(--font-md);
+  line-height: var(--line-tight);
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.holding-card__identity span {
+  display: block;
+
+  margin-top: var(--space-1);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.holding-card__value {
+  align-self: center;
+
+  min-width: 0;
+
+  display: grid;
+  gap: var(--space-1);
+}
+
+.holding-card__value strong {
+  overflow: hidden;
+
+  font-size: var(--font-xl);
+  line-height: var(--line-tight);
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.holding-card__value span {
+  font-size: var(--font-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.holding-card__footer {
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.holdings-empty {
+  grid-column: 1 / -1;
+
+  min-height: 142px;
+
+  display: grid;
+  place-items: center;
+
+  padding: var(--space-4);
+
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+
+/* =========================================================
+   8. Footer
+   ========================================================= */
+
+.monitor-footer {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+
+  padding: var(--space-2) var(--space-4);
+
+  border-radius: var(--radius-sm);
+
+  color: var(--color-text-muted);
+  font-size: var(--font-xs);
+}
+
+.monitor-footer strong {
+  color: var(--color-text);
+}
+
+
+/* =========================================================
+   9. Responsive
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .monitor-shell {
+    padding: var(--space-3);
+  }
+
+  .holdings-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .summary-list {
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 760px) {
+  /* Dashboard iframe can be narrower than the standalone 320px floor; only embedded phone mode removes that floor. */
+  html.monitor-embedded,
+  html.monitor-embedded body {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  html.monitor-embedded :is(
+    .monitor-shell,
+    .monitor-header,
+    .market-grid,
+    .holdings-section,
+    .holdings-grid,
+    .monitor-footer,
+    .market-grid > *,
+    .holdings-grid > *,
+    .market-card__header,
+    .market-card__header > div,
+    .market-card__value,
+    .metric-list,
+    .metric-row,
+    .holding-card__header,
+    .holding-card__identity,
+    .holding-card__value,
+    .holding-card__footer
+  ) {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  html.monitor-embedded :is(.monitor-shell, .market-card, .holding-card) {
+    width: 100%;
+  }
+
+  /* Phone already aligns without optical correction. Keep its zero-inset layout and neutral header position. */
+  html.monitor-embedded .monitor-shell {
+    padding-top: 0;
+  }
+
+  html.monitor-embedded .monitor-header {
+    transform: none;
+  }
+
+
+  html.monitor-embedded :is(.market-card, .holding-card) {
+    overflow: hidden;
+    contain: inline-size;
+  }
+
+  html.monitor-embedded .metric-row {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+  }
+
+  html.monitor-embedded :is(.metric-row dd, .holding-card__value span, .holding-card__footer) {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html.monitor-embedded .market-card__header > .status-badge {
+    max-width: 50%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .monitor-shell {
+    padding: 0;
+    gap: var(--space-2);
+  }
+
+  .monitor-header {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0 var(--space-1);
+  }
+
+  .monitor-header__title {
+    min-width: 0;
+  }
+
+  .monitor-header h1 {
+    overflow: hidden;
+    font-size: var(--font-md);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .monitor-header__tools {
+    min-width: 0;
+    flex: 0 0 auto;
+    gap: var(--space-2);
+  }
+
+  /* Phone cards use a more compact lifecycle chip to preserve title space. */
+  .status-badge {
+    min-width: 40px;
+    min-height: 20px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  /* Phone header keeps the semantic system state and drops the redundant live clock. */
+  .system-status {
+    font-size: var(--font-xs);
+    white-space: nowrap;
+  }
+
+  .system-status .status-dot,
+  .system-clock {
+    display: none;
+  }
+
+  .market-grid {
+    gap: var(--space-2);
+  }
+
+  .market-card {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+
+  /* Keep the status chip on the title row without stealing width from the one-line market subtitle. */
+  .market-card__header {
+    position: relative;
+    display: block;
+  }
+
+  .market-card__header > div {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .market-card__header > .status-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .market-card__title {
+    padding-right: 5.5rem;
+  }
+
+  .market-card__subtitle {
+    white-space: nowrap;
+    word-break: keep-all;
+    overflow-wrap: normal;
+  }
+
+  .market-card__value {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .market-card__value strong {
+    font-size: var(--font-xl);
+  }
+
+  .holdings-summary {
+    align-items: flex-start;
+    padding: var(--space-3);
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  /* Keep all seven lifecycle counts on one line; overflow scrolls instead of shrinking labels. */
+  .summary-list {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, max-content);
+    justify-content: space-between;
+    align-items: center;
+    gap: 0;
+    white-space: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .summary-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .summary-item {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .holdings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+    padding: var(--space-2);
+  }
+
+  .holding-card {
+    min-height: 0;
+    padding: var(--space-3);
+    grid-template-rows: auto auto;
+    gap: var(--space-2);
+  }
+
+  .holding-card__header {
+    position: relative;
+    display: block;
+    min-height: 24px;
+  }
+
+  .holding-card__identity {
+    width: 100%;
+  }
+
+  .holding-card__identity h3 {
+    display: -webkit-box;
+    overflow: hidden;
+    padding-right: 56px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .holding-card__identity span[data-role="ticker"] {
+    display: none;
+  }
+
+  .holding-card__header .status-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  .holding-card__value strong {
+    font-size: var(--font-lg);
+  }
+
+  /* Phone holdings use lifecycle badges for freshness; hide per-card tick time to save space. */
+  .holding-card__footer {
+    display: none;
+  }
+
+  .monitor-footer {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+@media (max-width: 420px) {
+  .monitor-header__title {
+    min-width: 0;
+  }
+
+  .monitor-header h1 {
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .system-clock {
+    display: none;
+  }
+
+  .market-grid,
+  .holdings-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .holding-card {
+    min-height: 0;
+  }
+
+  .monitor-footer {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+}

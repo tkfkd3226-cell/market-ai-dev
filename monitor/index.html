@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+
+  <title>보유종목 실시간 시세</title>
+
+  <!-- Keep the status shell readable even if the full stylesheet is slow or unavailable. -->
+  <style data-monitor-critical>
+    html { min-width: 320px; color-scheme: light dark; background: Canvas; }
+    body { min-height: 100vh; margin: 0; background: Canvas; color: CanvasText; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", Arial, sans-serif; }
+    .monitor-shell { max-width: 1120px; margin: 0 auto; padding: 16px; }
+  </style>
+  <!-- `media=print` makes the full CSS non-render-blocking; on load it becomes the screen stylesheet. -->
+  <link rel="stylesheet" href="./monitor.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="./monitor.css"></noscript>
+  <script src="./monitor.js" defer></script>
+</head>
+
+<body>
+  <main class="monitor-shell">
+    <header class="monitor-header">
+      <div class="monitor-header__title">
+        <h1>보유종목 실시간 시세</h1>
+      </div>
+
+      <div class="monitor-header__tools">
+        <div
+          id="system-status"
+          class="system-status"
+          data-status="warming"
+          aria-live="polite"
+        >
+          <span class="status-dot" aria-hidden="true"></span>
+          <span id="system-status-text">연결 대기</span>
+        </div>
+
+        <time id="system-clock" class="system-clock">--:--:--</time>
+
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="화면 테마 변경"
+          title="화면 테마 변경"
+        >
+          <span class="theme-toggle__icon" aria-hidden="true">◐</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="market-grid" aria-label="시장 현황">
+      <article
+        id="market-k200"
+        class="market-card"
+        data-market="k200"
+        data-status="warming"
+      >
+        <header class="market-card__header">
+          <div>
+            <h2 class="market-card__title">K200</h2>
+            <p class="market-card__subtitle">KOSPI200 선물</p>
+          </div>
+
+          <span class="status-badge" data-role="status">
+            대기
+          </span>
+        </header>
+
+        <div class="market-card__value">
+          <strong data-role="price">-</strong>
+          <span data-role="change">-</span>
+        </div>
+
+        <dl class="metric-list">
+          <div class="metric-row">
+            <dt>세션</dt>
+            <dd data-role="session">-</dd>
+          </div>
+
+          <div class="metric-row">
+            <dt>시간</dt>
+            <dd data-role="time">--:--:--</dd>
+          </div>
+        </dl>
+      </article>
+
+      <article
+        id="market-kospi"
+        class="market-card"
+        data-market="kospi"
+        data-status="warming"
+      >
+        <header class="market-card__header">
+          <div>
+            <h2 class="market-card__title">KOSPI</h2>
+            <p class="market-card__subtitle">코스피 현물</p>
+          </div>
+
+          <span class="status-badge" data-role="status">
+            대기
+          </span>
+        </header>
+
+        <div class="market-card__value">
+          <strong data-role="price">-</strong>
+          <span data-role="change">-</span>
+        </div>
+
+        <dl class="metric-list">
+          <div class="metric-row">
+            <dt>세션</dt>
+            <dd data-role="session">-</dd>
+          </div>
+
+          <div class="metric-row">
+            <dt>시간</dt>
+            <dd data-role="time">--:--:--</dd>
+          </div>
+        </dl>
+      </article>
+    </section>
+
+    <section
+      class="holdings-section"
+      aria-labelledby="holdings-title"
+    >
+      <header class="holdings-summary">
+        <h2 id="holdings-title">보유종목</h2>
+
+        <dl class="summary-list">
+          <div class="summary-item">
+            <dt>전체</dt>
+            <dd id="summary-total">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="live">
+            <dt>정상</dt>
+            <dd id="summary-live">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="extended">
+            <dt>시간외</dt>
+            <dd id="summary-extended">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="closed">
+            <dt>장마감</dt>
+            <dd id="summary-closed">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="warming">
+            <dt>대기</dt>
+            <dd id="summary-warming">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="stale">
+            <dt>지연</dt>
+            <dd id="summary-stale">0</dd>
+          </div>
+
+          <div class="summary-item" data-status="error">
+            <dt>오류</dt>
+            <dd id="summary-error">0</dd>
+          </div>
+        </dl>
+      </header>
+
+      <div
+        id="holdings-grid"
+        class="holdings-grid"
+        aria-live="polite"
+        aria-busy="true"
+      >
+        <div class="holdings-empty">
+          보유종목 정보를 불러오는 중입니다.
+        </div>
+      </div>
+    </section>
+
+    <footer class="monitor-footer">
+      <div class="connection-state">
+        <span
+          id="footer-status-dot"
+          class="status-dot"
+          data-status="warming"
+          aria-hidden="true"
+        ></span>
+
+        <span>
+          연결:
+          <strong id="footer-connection">대기</strong>
+        </span>
+      </div>
+
+      <div>
+        마지막 수신:
+        <time id="footer-last-received">--:--:--</time>
+      </div>
+    </footer>
+  </main>
+
+  <template id="holding-card-template">
+    <article
+      class="holding-card"
+      data-status="warming"
+    >
+      <header class="holding-card__header">
+        <div class="holding-card__identity">
+          <h3 data-role="name">-</h3>
+          <span data-role="ticker">-</span>
+        </div>
+
+        <span
+          class="status-badge"
+          data-role="status"
+        >
+          대기
+        </span>
+      </header>
+
+      <div class="holding-card__value">
+        <strong data-role="price">-</strong>
+        <span data-role="change">-</span>
+      </div>
+
+      <footer class="holding-card__footer">
+        <time data-role="time">--:--:--</time>
+      </footer>
+    </article>
+  </template>
+</body>
+</html>

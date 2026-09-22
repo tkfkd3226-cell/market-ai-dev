@@ -35,7 +35,7 @@
 | `KisKospi200Bridge/` | x86 ActiveX Bridge 실제 C# 구현 |
 | `start-local-server.pyw` | Investment Local Suite, 8000/8002, Tailscale Serve 경계 |
 | `app.py` + 서비스 모듈 | FastAPI 8001 backend |
-| `requirements*.txt`, build scripts | clean build / dependency / toolchain contract |
+| `requirements*.txt`, `tools/run-tests.py`, build scripts | source-test / clean build / dependency / toolchain contract |
 | `tests/` | 현재 명시된 contract의 회귀 안전망 |
 | `investment-dashboard` 최신 snapshot | Dashboard ↔ Market AI 연동 계약 확인용 |
 | 운영 `market-ai` | 재빌드 이후 실제 runtime 검증용, 초기 source 평가에 필수 아님 |
@@ -624,6 +624,19 @@ CSS 속성명, Win32 상수값, DOM/C# 구현 순서처럼 사용자 결과와 �
 | Docs only | 링크·상호 참조·source semantic 정합성; 불필요한 runtime rebuild 강제 금지 |
 
 이미 안정된 영역은 직접 dependency가 없는 한 매번 전체 재평가하지 않는다.
+
+## 13.1 Source-test dependency preflight
+
+새 평가 머신이나 clean venv에서 전체 Python QA를 실행할 때는 **환경 누락과 코드 결함을 구분**한다. 표준 경로는 다음이다.
+
+```text
+python -m pip install -r requirements-test.txt
+python tools/run-tests.py -q
+```
+
+`tools/run-tests.py`가 dependency 누락을 보고하면 이를 제품 코드 실패나 pytest FAIL로 채점하지 않는다. 먼저 `requirements-test.txt`로 source-test 환경을 완성한 뒤 다시 실행한다. `yfinance` 등 runtime dependency를 임시 fake module/stub으로 대체해 전체 PASS를 주장하는 방식은 정식 평가 경로로 사용하지 않는다.
+
+Windows frozen runtime의 exact dependency audit은 별도 build contract이므로 source-test 환경에 `requirements-lock.txt`를 무조건 설치해 플랫폼을 섞지 않는다.
 
 ---
 

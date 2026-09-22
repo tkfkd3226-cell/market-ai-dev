@@ -174,7 +174,8 @@ market-ai-dev\
 │  ├─ clean-dev-artifacts.ps1
 │  ├─ close-efriend-tray.ps1
 │  ├─ runtime-deploy.ps1
-│  └─ runtime-stop.ps1
+│  ├─ runtime-stop.ps1
+│  └─ run-tests.py
 ├─ .env.example
 ├─ .gitignore
 ├─ app.py
@@ -187,6 +188,7 @@ market-ai-dev\
 ├─ market_ai_project_handover.md
 ├─ market_ai_evaluation_guide.md
 ├─ requirements.txt
+├─ requirements-test.txt
 ├─ requirements-lock.txt
 ├─ requirements-build-lock.txt
 ├─ requirements-openai.txt
@@ -225,6 +227,26 @@ __pycache__/
 `eFriendQA/`는 runtime dependency가 아니라 KIS eFriend 수정·검증용 참고자료다. 용량 정리가 필요하면 별도 보관할 수 있으나 runtime cleanup과 혼동하지 않는다.
 
 소스와 build/deploy script를 Source of Truth로 유지하고, 재생성 가능한 EXE/support directory나 build residue를 개발 contract로 의존하지 않는다.
+
+## 2.1 Source test environment
+
+소스 평가와 pytest는 운영 Windows frozen-runtime lock을 그대로 강제하지 않는다. 역할은 다음처럼 분리한다.
+
+- `requirements.txt`: 플랫폼 공통 runtime compatibility policy
+- `requirements-test.txt`: `requirements.txt` + source/test 도구
+- `requirements-lock.txt`: Windows x64 / Python 3.13 운영 Market AI exact runtime lock
+- `requirements-build-lock.txt`: Windows build-tool exact lock
+
+새 평가 환경이나 clean venv에서는 먼저 다음을 실행한다.
+
+```text
+python -m pip install -r requirements-test.txt
+python tools/run-tests.py -q
+```
+
+`tools/run-tests.py`는 `requirements-test.txt`와 그 include를 읽어 필요한 distribution이 설치됐는지 먼저 확인한다. 누락 시 pytest collection을 억지로 우회하거나 fake module/stub을 삽입하지 않고, 누락 목록과 설치 명령을 출력한 뒤 종료한다. 의존성이 준비된 뒤에는 같은 Python interpreter로 `python -m pytest`를 실행한다.
+
+따라서 `yfinance` 같은 runtime dependency가 평가 머신에 우연히 없다는 이유로 source test가 import 단계에서 의미 없이 중단되는 문제는 **환경 준비 단계에서 명시적으로 해결**한다. 반대로 실제 운영 build의 exact-version 검증은 계속 §3.3의 `requirements-lock.txt` contract가 소유한다.
 
 # 3. 빌드 / 배포 contract
 

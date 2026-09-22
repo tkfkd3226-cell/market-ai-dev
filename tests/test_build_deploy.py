@@ -11,6 +11,8 @@ GITIGNORE = ROOT / ".gitignore"
 BUILD_MARKET = ROOT / "build-market-ai.ps1"
 BUILD_SUITE = ROOT / "build-investment-local-suite.ps1"
 BUILD_BRIDGE = ROOT / "build-kis-bridge-release.bat"
+TEST_REQUIREMENTS = ROOT / "requirements-test.txt"
+TEST_RUNNER = ROOT / "tools" / "run-tests.py"
 BRIDGE_PROJECT = ROOT / "KisKospi200Bridge" / "KisKospi200Bridge.csproj"
 SUITE_SOURCE = ROOT / "start-local-server.pyw"
 
@@ -73,6 +75,26 @@ def test_runtime_deploy_helper_has_non_mutating_plan_gate():
     plan_index = source.index('if ($PlanOnly)')
     backup_index = source.index('$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"')
     assert plan_index < backup_index
+
+
+def test_source_test_environment_uses_runtime_policy_plus_pytest_and_preflight_runner():
+    requirements = TEST_REQUIREMENTS.read_text(encoding="utf-8")
+    runner = TEST_RUNNER.read_text(encoding="utf-8")
+
+    active_requirements = [
+        line.strip()
+        for line in requirements.splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+    assert "-r requirements.txt" in active_requirements
+    assert any(line.startswith("pytest") for line in active_requirements)
+
+    assert 'TEST_REQUIREMENTS = ROOT / "requirements-test.txt"' in runner
+    assert "metadata.version(name)" in runner
+    assert "Market AI test dependencies are incomplete." in runner
+    assert "pip install -r" in runner
+    assert '[sys.executable, "-m", "pytest"' in runner
+    assert "subprocess.call(command, cwd=ROOT)" in runner
 
 
 def test_build_dependency_locks_are_exact_and_shared_without_freezing_log_text():

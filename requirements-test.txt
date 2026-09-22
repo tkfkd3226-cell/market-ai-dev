@@ -1,0 +1,7 @@
+# Market AI source/test environment dependencies
+#
+# Keep runtime compatibility policy in requirements.txt. This file only adds
+# test tooling so source evaluation can run on Windows or Linux without
+# relying on whatever packages happen to be globally installed.
+-r requirements.txt
+pytest>=8.0,<10.0

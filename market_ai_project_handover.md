@@ -174,8 +174,7 @@ market-ai-dev\
 │  ├─ clean-dev-artifacts.ps1
 │  ├─ close-efriend-tray.ps1
 │  ├─ runtime-deploy.ps1
-│  ├─ runtime-stop.ps1
-│  └─ run-tests.py
+│  └─ runtime-stop.ps1
 ├─ .env.example
 ├─ .gitignore
 ├─ app.py
@@ -188,7 +187,6 @@ market-ai-dev\
 ├─ market_ai_project_handover.md
 ├─ market_ai_evaluation_guide.md
 ├─ requirements.txt
-├─ requirements-test.txt
 ├─ requirements-lock.txt
 ├─ requirements-build-lock.txt
 ├─ requirements-openai.txt
@@ -227,26 +225,6 @@ __pycache__/
 `eFriendQA/`는 runtime dependency가 아니라 KIS eFriend 수정·검증용 참고자료다. 용량 정리가 필요하면 별도 보관할 수 있으나 runtime cleanup과 혼동하지 않는다.
 
 소스와 build/deploy script를 Source of Truth로 유지하고, 재생성 가능한 EXE/support directory나 build residue를 개발 contract로 의존하지 않는다.
-
-## 2.1 Source test environment
-
-소스 평가와 pytest는 운영 Windows frozen-runtime lock을 그대로 강제하지 않는다. 역할은 다음처럼 분리한다.
-
-- `requirements.txt`: 플랫폼 공통 runtime compatibility policy
-- `requirements-test.txt`: `requirements.txt` + source/test 도구
-- `requirements-lock.txt`: Windows x64 / Python 3.13 운영 Market AI exact runtime lock
-- `requirements-build-lock.txt`: Windows build-tool exact lock
-
-새 평가 환경이나 clean venv에서는 먼저 다음을 실행한다.
-
-```text
-python -m pip install -r requirements-test.txt
-python tools/run-tests.py -q
-```
-
-`tools/run-tests.py`는 `requirements-test.txt`와 그 include를 읽어 필요한 distribution이 설치됐는지 먼저 확인한다. 누락 시 pytest collection을 억지로 우회하거나 fake module/stub을 삽입하지 않고, 누락 목록과 설치 명령을 출력한 뒤 종료한다. 의존성이 준비된 뒤에는 같은 Python interpreter로 `python -m pytest`를 실행한다.
-
-따라서 `yfinance` 같은 runtime dependency가 평가 머신에 우연히 없다는 이유로 source test가 import 단계에서 의미 없이 중단되는 문제는 **환경 준비 단계에서 명시적으로 해결**한다. 반대로 실제 운영 build의 exact-version 검증은 계속 §3.3의 `requirements-lock.txt` contract가 소유한다.
 
 # 3. 빌드 / 배포 contract
 
@@ -978,7 +956,7 @@ Bridge는 KOSPI200 선물의 월물/session route에 대해서는 Market AI 서�
 - 10초 polling으로 read-only `/api/bridge/kis-efriend/quote-universe`를 조회하며 Dashboard `client_id` lease를 생성·연장하지 않는다.
 - 표시값은 process-memory realtime 값을 우선하고, 장마감·재시작 복원에서만 durable snapshot을 fallback한다. active session에서 durable fallback만 남은 경우 backend의 explicit `stale`을 우선해 `지연`으로 표시하고, 새 realtime tick 전에는 `정상`/`시간외`로 승격하지 않는다.
 - 보유종목 realtime `SC_R`는 현재가(`seq 2`), 전일대비 금액(`seq 4`), 등락률(`seq 5`)을 함께 전달한다. Web Monitor와 Native Bridge 보유종목 카드는 모두 등락률 오른쪽에 원본 `change_amount`를 같은 trend 색상으로 표시한다. `MarketSnapshot`에도 원본 `change_amount`를 함께 보존하고, `/api/bridge/kis-efriend/quote-universe`의 `monitor_snapshots`에도 그대로 전달하여 장마감 후 Market AI/Bridge 재시작에서도 최근 완료 KRX 거래일의 exact KIS durable snapshot으로 금액까지 복원한다. 과거 DB처럼 원본 `change_amount`가 실제로 없는 legacy snapshot은 퍼센트에서 역산하지 않고 금액 표시만 생략한다.
-- `monitor.css`는 non-blocking으로 로드하고 `index.html`에는 첫 화면을 읽을 수 있는 최소 critical style만 둔다.
+- `monitor.css`는 non-blocking으로 로드하고 `index.html`에는 첫 화면을 읽을 수 있는 최소 critical style만 둔다. `/monitor/`, `index.html`, `monitor.css`, `monitor.js` 응답은 `Cache-Control: no-store` 계열 헤더를 강제해 Monitor를 열 때마다 최신 정적 파일을 다시 읽게 한다.
 - Desktop 보유종목 5열, 1100px 이하 3열, Phone 2열을 유지한다. Phone에서는 K200/KOSPI와 보유종목 모두 2열이며 420px 이하에서도 1열로 되돌리지 않는다.
 - Phone 보유종목 카드는 종목코드를 숨기고, 상태 badge를 카드 우측 상단에 고정하며, 종목명은 최대 2줄까지 표시한다. Phone header의 시스템 상태는 상태 텍스트만 유지하고 실시간 clock과 status dot은 숨긴다.
 - Phone shell의 화면 바깥 padding은 0으로 두고, 카드/grid 자식은 부모 폭을 밀어내지 않도록 축소 가능해야 한다. 긴 종목명·가격·상태는 카드 경계 밖으로 overflow하지 않는다.

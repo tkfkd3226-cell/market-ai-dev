@@ -473,6 +473,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+MONITOR_NO_STORE_PATHS = frozenset({
+    "/monitor",
+    "/monitor/",
+    "/monitor/index.html",
+    "/monitor/monitor.css",
+    "/monitor/monitor.js",
+})
+
+
+@app.middleware("http")
+async def disable_monitor_static_cache(request, call_next):
+    response = await call_next(request)
+    if request.url.path in MONITOR_NO_STORE_PATHS:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 monitor_directory = resolve_monitor_directory()
 if monitor_directory.is_dir():
     app.mount(

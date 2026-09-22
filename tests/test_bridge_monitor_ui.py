@@ -131,6 +131,10 @@ class WebMonitorContractTests(unittest.TestCase):
         self.assertIn('src="./monitor.js"', self.index_source)
         self.assertIn('"/monitor"', self.app_source)
         self.assertIn("StaticFiles", self.app_source)
+        self.assertIn("MONITOR_NO_STORE_PATHS", self.app_source)
+        self.assertIn('response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"', self.app_source)
+        self.assertIn('response.headers["Pragma"] = "no-cache"', self.app_source)
+        self.assertIn('response.headers["Expires"] = "0"', self.app_source)
         self.assertIn('"--add-data", "$MonitorPath;monitor"', self.build_source)
         for asset in ("/monitor/", "/monitor/monitor.css", "/monitor/monitor.js"):
             self.assertIn(asset, self.build_source)

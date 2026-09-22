@@ -4,7 +4,7 @@
 > 목적: 변경 이력이 아니라 **현재 유효한 장기 유지보수 contract**를 보존한다.
 
 > **문서 성격 / 대상 환경**  
-> 이 문서는 `market-ai-dev`의 **개발 · 재빌드 · 배포 · 장기 유지보수 contract**를 보존하는 개발자용 문서다. 운영 PC에서 실행·상태 확인만 할 때는 `market-ai/README.md`를 우선한다.  
+> 이 문서는 `market-ai-dev`의 **개발 · 재빌드 · 배포 · 장기 유지보수 contract**를 보존하는 개발자용 문서다. 운영 실행·상태 확인·빌드 진입점은 `market-ai-dev/README.md`를 우선한다.  
 > 개발/빌드 PC는 Python과 필요한 빌드 도구를 사용할 수 있지만, 최종 `market-ai` runtime은 Python-free를 목표로 한다. KIS Bridge는 Windows/x86/eFriend ActiveX 환경을 전제로 한다.
 >
 > **Source of Truth 구분**  
@@ -129,8 +129,7 @@ market-ai\
 ├─ InvestmentLocalSuite.ico
 ├─ KisKospi200Bridge.exe
 ├─ KisKospi200Bridge.exe.config
-├─ MarketAI.exe
-└─ README.md
+└─ MarketAI.exe
 ```
 
 `.env`는 존재할 수 있으나 **기본 runtime의 필수 파일이 아니다.**
@@ -174,9 +173,11 @@ market-ai-dev\
 │  ├─ clean-dev-artifacts.ps1
 │  ├─ close-efriend-tray.ps1
 │  ├─ runtime-deploy.ps1
-│  └─ runtime-stop.ps1
+│  ├─ runtime-stop.ps1
+│  └─ run-tests.py
 ├─ .env.example
 ├─ .gitignore
+├─ README.md
 ├─ app.py
 ├─ build-investment-local-suite.ps1
 ├─ build-kis-bridge-release.bat
@@ -187,6 +188,7 @@ market-ai-dev\
 ├─ market_ai_project_handover.md
 ├─ market_ai_evaluation_guide.md
 ├─ requirements.txt
+├─ requirements-test.txt
 ├─ requirements-lock.txt
 ├─ requirements-build-lock.txt
 ├─ requirements-openai.txt
@@ -226,6 +228,15 @@ __pycache__/
 
 소스와 build/deploy script를 Source of Truth로 유지하고, 재생성 가능한 EXE/support directory나 build residue를 개발 contract로 의존하지 않는다.
 
+Source-test 환경은 운영 frozen lock과 분리한다. `requirements-test.txt`는 플랫폼 공통 `requirements.txt`에 pytest만 더하며, 정식 source QA는 다음 경로를 사용한다.
+
+```text
+python -m pip install -r requirements-test.txt
+python tools/run-tests.py -q
+```
+
+`tools/run-tests.py`는 필수 distribution 누락을 먼저 보고하고, fake module/stub으로 import 실패를 숨기지 않은 채 같은 interpreter의 `python -m pytest`를 실행한다.
+
 # 3. 빌드 / 배포 contract
 
 공식 build script는 이제 **빌드 산출물을 dev root에 두지 않고**, 검증된 staging set을 같은 부모의 sibling `../market-ai`에 자동 반영한다. 정상적인 정식 빌드에서 운영 파일을 사람이 dev에서 `market-ai`로 수동 복사하는 절차는 없다.
@@ -244,7 +255,7 @@ market-ai-dev source
 → BUILD + DEPLOY : SUCCESS
 ```
 
-`market-ai-dev`와 `market-ai`는 같은 부모의 형제 폴더여야 하고, dev 폴더명은 `market-ai-dev`, runtime 폴더명은 `market-ai`여야 한다. runtime에는 marker인 `README.md`가 존재해야 한다. 이 preflight가 실패하면 배포하지 않는다.
+`market-ai-dev`와 `market-ai`는 같은 부모의 형제 폴더여야 하고, dev 폴더명은 `market-ai-dev`, runtime 폴더명은 `market-ai`여야 한다. runtime 식별은 **정확한 두 폴더명 + 동일 부모 경로 + dev/runtime 분리**로 검증하며, 운영 폴더의 `README.md` 존재 여부에는 의존하지 않는다.
 
 ## 3.1 공통 Runtime stop contract
 
@@ -296,7 +307,6 @@ KisBridge
 ```text
 db/market_signal.db
 .env                 # 실제 사용하는 경우
-README.md
 .gitignore
 InvestmentLocalSuite.ico
 tools/close-efriend-tray.ps1
@@ -1073,7 +1083,7 @@ API Key가 없어도 Market AI 핵심 runtime 오류로 취급하지 않는다.
 
 # 16. 운영 · 검증 문서 경계
 
-현재 실행 가능 component, 원격 URL, 운영 프로세스와 사용자 확인 절차는 `market-ai/README.md`가 소유하며, 이 handover에는 일시적인 상태표를 누적하지 않는다. 이 문서는 앞 절에서 정의한 architecture·runtime/session·build/deploy의 **장기 contract**를 소유하고, 실제 현재 동작 여부는 최신 source와 운영 Runtime으로 확인한다.
+현재 실행 가능 component, 원격 URL, 운영 프로세스와 사용자 확인 절차는 `market-ai-dev/README.md`가 소유하며, 이 handover에는 일시적인 상태표를 누적하지 않는다. 이 문서는 앞 절에서 정의한 architecture·runtime/session·build/deploy의 **장기 contract**를 소유하고, 실제 현재 동작 여부는 최신 source와 운영 Runtime으로 확인한다.
 
 변경별 평가 강도·A/B/C·반례·100점 Gate와 자동/정적 QA·Windows 실기 선택 기준은 `market_ai_evaluation_guide.md`가 소유한다. 같은 회귀 체크리스트를 이 문서에 다시 복제하지 않는다.
 

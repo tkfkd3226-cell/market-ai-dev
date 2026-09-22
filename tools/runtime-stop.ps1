@@ -64,11 +64,14 @@ function Test-IsAdministrator {
     }
 }
 
+if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals((Split-Path -Leaf $DevRoot), "market-ai-dev")) {
+    Fail "Runtime stop helper must run from a repository directory named market-ai-dev. Resolved: $DevRoot"
+}
+if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals((Split-Path -Leaf $RuntimeRoot), "market-ai")) {
+    Fail "Runtime target must be the sibling directory named market-ai. Resolved: $RuntimeRoot"
+}
 if (-not (Test-Path -LiteralPath $RuntimeRoot -PathType Container)) {
     Fail "Sibling market-ai runtime directory not found: $RuntimeRoot"
-}
-if (-not (Test-Path -LiteralPath (Join-Path $RuntimeRoot "README.md") -PathType Leaf)) {
-    Fail "Sibling market-ai runtime marker README.md not found: $RuntimeRoot\README.md"
 }
 
 # InvestmentLocalSuite.exe is built with requireAdministrator. A normal developer

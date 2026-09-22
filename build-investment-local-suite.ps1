@@ -13,7 +13,6 @@ $DeployHelper = Join-Path $Root "tools\runtime-deploy.ps1"
 $RuntimeStopHelper = Join-Path $Root "tools\runtime-stop.ps1"
 $CleanDevHelper = Join-Path $Root "tools\clean-dev-artifacts.ps1"
 $RuntimeRoot = Join-Path (Split-Path -Parent $Root) "market-ai"
-$RuntimeReadme = Join-Path $RuntimeRoot "README.md"
 $OutputExe = Join-Path $RuntimeRoot "InvestmentLocalSuite.exe"
 $OutputInternal = Join-Path $RuntimeRoot "_suite_internal"
 
@@ -77,7 +76,6 @@ Require-Path $DeployHelper "runtime deployment helper"
 Require-Path $RuntimeStopHelper "runtime stop helper"
 Require-Path $CleanDevHelper "clean-dev artifact helper"
 Require-Path $RuntimeRoot "sibling market-ai runtime"
-Require-Path $RuntimeReadme "sibling market-ai runtime marker README.md"
 if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals((Split-Path -Leaf $Root), "market-ai-dev")) {
     Fail "Investment Local Suite build/deploy must run from a repository directory named market-ai-dev. Resolved: $Root"
 }

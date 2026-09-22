@@ -35,7 +35,7 @@
 | `KisKospi200Bridge/` | x86 ActiveX Bridge 실제 C# 구현 |
 | `start-local-server.pyw` | Investment Local Suite, 8000/8002, Tailscale Serve 경계 |
 | `app.py` + 서비스 모듈 | FastAPI 8001 backend |
-| `requirements*.txt`, `tools/run-tests.py`, build scripts | source-test / clean build / dependency / toolchain contract |
+| `requirements*.txt`, `tools/run-tests.py`, build scripts | clean build / dependency / toolchain contract |
 | `tests/` | 현재 명시된 contract의 회귀 안전망 |
 | `investment-dashboard` 최신 snapshot | Dashboard ↔ Market AI 연동 계약 확인용 |
 | 운영 `market-ai` | 재빌드 이후 실제 runtime 검증용, 초기 source 평가에 필수 아님 |
@@ -625,19 +625,6 @@ CSS 속성명, Win32 상수값, DOM/C# 구현 순서처럼 사용자 결과와 �
 
 이미 안정된 영역은 직접 dependency가 없는 한 매번 전체 재평가하지 않는다.
 
-## 13.1 Source-test dependency preflight
-
-새 평가 머신이나 clean venv에서 전체 Python QA를 실행할 때는 **환경 누락과 코드 결함을 구분**한다. 표준 경로는 다음이다.
-
-```text
-python -m pip install -r requirements-test.txt
-python tools/run-tests.py -q
-```
-
-`tools/run-tests.py`가 dependency 누락을 보고하면 이를 제품 코드 실패나 pytest FAIL로 채점하지 않는다. 먼저 `requirements-test.txt`로 source-test 환경을 완성한 뒤 다시 실행한다. `yfinance` 등 runtime dependency를 임시 fake module/stub으로 대체해 전체 PASS를 주장하는 방식은 정식 평가 경로로 사용하지 않는다.
-
-Windows frozen runtime의 exact dependency audit은 별도 build contract이므로 source-test 환경에 `requirements-lock.txt`를 무조건 설치해 플랫폼을 섞지 않는다.
-
 ---
 
 # 14. Clean-room / Windows 실기
@@ -654,7 +641,18 @@ Windows frozen runtime의 exact dependency audit은 별도 build contract이므�
 
 원본 Source of Truth를 새 위치에 풀고 최종 수정 파일만 적용해 관련 QA를 다시 실행한다. 작은 문서·CSS 수정마다 전체 clean-room을 강제하지 않는다.
 
-## 14.2 Windows 실기
+## 14.2 Source-test 환경
+
+정식 source QA는 플랫폼 공통 test 환경을 먼저 준비한다.
+
+```text
+python -m pip install -r requirements-test.txt
+python tools/run-tests.py -q
+```
+
+`tools/run-tests.py`가 dependency 누락을 보고하면 제품 코드 FAIL로 채점하지 않고 환경을 먼저 완성한다. `yfinance` 같은 runtime dependency를 fake module/stub으로 대체해 전체 PASS를 주장하지 않는다. Windows frozen runtime의 exact lock은 build contract가 별도로 소유한다.
+
+## 14.3 Windows 실기
 
 source 평가와 runtime 실기는 구분한다. 실제 EXE/eFriend/Tailscale/Windows 권한 동작은 필요한 변경에서만 운영 PC에서 확인한다.
 
@@ -678,7 +676,7 @@ source 평가와 runtime 실기는 구분한다. 실제 EXE/eFriend/Tailscale/Wi
 역할:
 
 ```text
-market-ai/README.md
+market-ai-dev/README.md
 → 운영 실행 / 상태 확인 / 필요한 build 선택 / 데이터 보존
 
 market_ai_project_handover.md

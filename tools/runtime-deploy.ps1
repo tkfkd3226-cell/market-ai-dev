@@ -183,7 +183,6 @@ if (Test-PathEquals $DevRoot $RuntimeRoot) {
 }
 
 Require-Directory $RuntimeRoot "Sibling market-ai runtime"
-Require-File (Join-Path $RuntimeRoot "README.md") "Runtime repository marker README.md"
 Require-Directory $StagingRoot "Staging"
 
 $StagingRoot = Get-NormalizedFullPath $StagingRoot

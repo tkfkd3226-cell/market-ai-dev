@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
 cd /d "%~dp0"
@@ -23,10 +23,6 @@ if /i not "%DEV_LEAF%"=="market-ai-dev" (
 )
 if not exist "%RUNTIME_ROOT%\" (
     echo [ERROR] Sibling market-ai runtime directory not found: %RUNTIME_ROOT%
-    exit /b 1
-)
-if not exist "%RUNTIME_ROOT%\README.md" (
-    echo [ERROR] Sibling market-ai runtime marker README.md not found: %RUNTIME_ROOT%\README.md
     exit /b 1
 )
 if not exist "%DEPLOY_HELPER%" (

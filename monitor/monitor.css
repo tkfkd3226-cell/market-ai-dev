@@ -969,8 +969,8 @@ html.monitor-embedded .monitor-header__tools {
     width: 100%;
     min-width: 0;
     min-height: 100%;
-    background: var(--color-bg) !important;
-    color: var(--color-text) !important;
+    background: var(--color-bg);
+    color: var(--color-text);
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -979,6 +979,7 @@ html.monitor-embedded .monitor-header__tools {
     width: 100%;
     max-width: none;
     margin: 0;
+    background: var(--color-bg);
   }
 
   html.monitor-embedded .monitor-header {

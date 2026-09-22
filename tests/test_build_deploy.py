@@ -36,7 +36,6 @@ def test_runtime_deploy_helper_targets_only_sibling_runtime_and_fixed_components
     for token in (
         '$ParentRoot = Split-Path -Parent $DevRoot',
         '$RuntimeRoot = Join-Path $ParentRoot "market-ai"',
-        'README.md',
         'Test-PathInside $StagingRoot $RuntimeRoot',
         'ValidateSet("MarketAI", "InvestmentLocalSuite", "KisBridge")',
         '"MarketAI.exe"',
@@ -95,6 +94,20 @@ def test_source_test_environment_uses_runtime_policy_plus_pytest_and_preflight_r
     assert "pip install -r" in runner
     assert '[sys.executable, "-m", "pytest"' in runner
     assert "subprocess.call(command, cwd=ROOT)" in runner
+
+
+def test_runtime_identity_does_not_depend_on_runtime_readme_marker():
+    deploy = DEPLOY.read_text(encoding="utf-8-sig")
+    stop = STOP.read_text(encoding="utf-8-sig")
+    build_market = BUILD_MARKET.read_text(encoding="utf-8-sig")
+    build_suite = BUILD_SUITE.read_text(encoding="utf-8-sig")
+    build_bridge = BUILD_BRIDGE.read_text(encoding="utf-8-sig")
+
+    assert 'runtimeLeaf, "market-ai"' in deploy
+    assert 'market-ai-dev and market-ai must share the same parent directory.' in deploy
+    for source in (deploy, stop, build_market, build_suite, build_bridge):
+        assert 'runtime marker README.md' not in source
+        assert 'Runtime repository marker README.md' not in source
 
 
 def test_build_dependency_locks_are_exact_and_shared_without_freezing_log_text():

@@ -17,7 +17,6 @@ $CleanDevHelper = Join-Path $Root "tools\clean-dev-artifacts.ps1"
 $RuntimeRoot = Join-Path (Split-Path -Parent $Root) "market-ai"
 $RuntimeExe = Join-Path $RuntimeRoot "MarketAI.exe"
 $RuntimeInternal = Join-Path $RuntimeRoot "_internal"
-$RuntimeReadme = Join-Path $RuntimeRoot "README.md"
 
 $PyInstallerVersion = "6.22.2"
 $BuildScriptRevision = "phase4-r1-clean-dev-auto-stop-staged-smoke-sibling-deploy-pwsh51"
@@ -138,9 +137,6 @@ if (-not [System.StringComparer]::OrdinalIgnoreCase.Equals((Split-Path -Leaf $Ro
 }
 if (-not (Test-Path -LiteralPath $RuntimeRoot -PathType Container)) {
     Fail "Sibling market-ai runtime directory not found: $RuntimeRoot"
-}
-if (-not (Test-Path -LiteralPath $RuntimeReadme -PathType Leaf)) {
-    Fail "Sibling market-ai runtime marker README.md not found: $RuntimeReadme"
 }
 Write-Step "Revision: $BuildScriptRevision"
 Write-Step "Sibling runtime preflight PASS: $RuntimeRoot"

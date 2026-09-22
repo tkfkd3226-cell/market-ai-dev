@@ -989,6 +989,14 @@ html.monitor-embedded .monitor-header__tools {
     overflow: visible;
   }
 
+  /* Print keeps the desktop holdings row count instead of inheriting the <=760px two-column
+     screen layout. The parent iframe height is measured from the normal embedded shell; keeping
+     the same five-column flow prevents paged-media reflow from making the document taller and
+     clipping the last holding cards. */
+  .holdings-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
   html.monitor-embedded .monitor-header {
     transform: none;
   }

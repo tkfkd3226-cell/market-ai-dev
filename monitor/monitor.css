@@ -924,3 +924,83 @@ html.monitor-embedded .monitor-header__tools {
     gap: var(--space-1);
   }
 }
+
+/* =========================================================
+   10. Print
+   ========================================================= */
+
+@media print {
+  /* Embedded monitor print is a document view, not a screenshot of the current dark theme. */
+  :root,
+  [data-theme="dark"] {
+    color-scheme: light;
+
+    --color-bg: #f5f7fa;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f8fafc;
+    --color-border: #dce2e8;
+
+    --color-text: #18212b;
+    --color-text-muted: #697586;
+
+    --color-positive: #d92d20;
+    --color-negative: #1570ef;
+
+    --color-live: #16803c;
+    --color-live-bg: #edf9f0;
+
+    --color-closed: #596579;
+    --color-closed-bg: #f0f2f5;
+
+    --color-warming: #9a6700;
+    --color-warming-bg: #fff8df;
+
+    --color-stale: #b54708;
+    --color-stale-bg: #fff4e5;
+
+    --color-error: #c62828;
+    --color-error-bg: #fff0f0;
+
+    --shadow-card: none;
+  }
+
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    background: var(--color-bg) !important;
+    color: var(--color-text) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .monitor-shell {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  html.monitor-embedded .monitor-header {
+    transform: none;
+  }
+
+  .monitor-header {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  html.monitor-embedded .monitor-header__tools,
+  .monitor-header__tools {
+    margin-left: auto;
+    padding-right: 0;
+    justify-content: flex-end;
+  }
+
+  .theme-toggle {
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
+}

@@ -6,7 +6,7 @@
 
 const API_URL = "/api/bridge/kis-efriend/quote-universe";
 
-const POLL_INTERVAL_MS = 10_000;
+const POLL_INTERVAL_MS = 5_000;
 const REQUEST_TIMEOUT_MS = 5_000;
 const STALE_AFTER_MS = 90_000;
 

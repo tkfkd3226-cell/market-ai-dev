@@ -11,7 +11,7 @@ parent/
 └─ market-ai/       # EXE와 runtime state만 보관
 ```
 
-운영 포트는 Dashboard `8000`, Market AI local API `8001`, remote GET-only proxy `8002`다. Web Monitor는 `/monitor/`이며 Dashboard의 **보유종목 실시간 시세**에서 embedded로 연다.
+운영 포트는 Dashboard `8000`, Market AI local API `8001`, remote GET-only proxy `8002`다. Web Monitor는 `/monitor/`이며 Dashboard의 **보유종목 실시간 시세**에서 embedded로 연다. 화면 조회는 응답 완료 후 5초 간격으로 실행하며, 숨김 상태에서는 중단한다. 모니터 polling 실행 검증: `node --test tests/monitor-polling.test.cjs`.
 
 ## Source 테스트
 

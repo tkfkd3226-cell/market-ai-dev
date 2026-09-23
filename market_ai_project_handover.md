@@ -876,14 +876,14 @@ Dashboard의 live valuation request는 tab별 `client_id`와 현재 보유 ticke
 - `dashboard_tickers`는 구독/lease universe 계약을 그대로 유지하고, 모니터 표시 순서는 별도 `dashboard_display_tickers`로 제공한다. 표시 순서는 Dashboard 현황표와 같은 원칙으로 **증권계좌 평가금액 내림차순 → 증권계좌에 없는 퇴직연금 종목 평가금액 내림차순**이며, 양쪽 계좌에 같은 ticker가 있으면 한 번만 표시한다. Web Monitor와 Native Bridge는 이 배열을 우선 사용하고 구버전 backend에서는 `dashboard_tickers`로 fallback한다.
 - Web Monitor가 Dashboard iframe으로 열리면 `postMessage` theme handshake를 사용해 Light/Dark 상태를 양방향 동기화한다. Monitor 단독 실행 시에는 기존 `market-ai-monitor-theme` 저장값을 사용하고, Dashboard에서 받은 테마도 로컬 저장값에 반영한다.
 - 같은 client가 같은 set을 다시 요청했다고 universe version을 불필요하게 증가시키지 않는다.
-- Dashboard의 Market AI와 live valuation 화면 조회 주기는 모두 **10초**이고 backend client lease는 현재 **120초**다. visible client의 단일 지연 polling 때문에 다른 client reconcile에서 오만료되지 않도록 여유를 둔다. 정확한 값은 backend source를 Source of Truth로 한다.
+- Dashboard의 Market AI와 live valuation 화면 조회 주기는 모두 **5초**이고 backend client lease는 현재 **120초**다. visible client의 단일 지연 polling 때문에 다른 client reconcile에서 오만료되지 않도록 여유를 둔다. 정확한 값은 backend source를 Source of Truth로 한다.
 
 현재 주기/수명 contract는 다음처럼 서로 독립적이다.
 
 ```text
-Web Monitor polling                10초
-Dashboard Market AI polling        10초
-Dashboard live valuation polling   10초
+Web Monitor polling                 5초
+Dashboard Market AI polling         5초
+Dashboard live valuation polling    5초
 Market AI client lease            120초
 Dynamic KRX DB snapshot throttle   30초
 ```
@@ -964,7 +964,7 @@ Bridge는 KOSPI200 선물의 월물/session route에 대해서는 Market AI 서�
 - 로컬: `http://127.0.0.1:8001/monitor/`
 - tailnet: `https://node.tail60a98e.ts.net/monitor/` → Tailscale Serve → 8002 GET-only proxy
 - `/monitor`는 `/monitor/`로 정규화하여 상대 CSS/JS가 같은 origin에서 로드되게 한다.
-- 10초 polling으로 read-only `/api/bridge/kis-efriend/quote-universe`를 조회하며 Dashboard `client_id` lease를 생성·연장하지 않는다.
+- 5초 polling으로 read-only `/api/bridge/kis-efriend/quote-universe`를 조회하며 Dashboard `client_id` lease를 생성·연장하지 않는다. 응답 처리가 끝난 뒤 5초 후 다음 요청을 예약하므로 느린 응답이 중첩되지 않는다. 숨김 상태에서는 timer/진행 중 요청을 정리하고 visible 복귀 시 즉시 조회한다. 실행 테스트는 `node --test tests/monitor-polling.test.cjs`로 확인한다.
 - 표시값은 process-memory realtime 값을 우선하고, 장마감·재시작 복원에서만 durable snapshot을 fallback한다. active session에서 durable fallback만 남은 경우 backend의 explicit `stale`을 우선해 `지연`으로 표시하고, 새 realtime tick 전에는 `정상`/`시간외`로 승격하지 않는다.
 - 보유종목 realtime `SC_R`는 현재가(`seq 2`), 전일대비 금액(`seq 4`), 등락률(`seq 5`)을 함께 전달한다. Web Monitor와 Native Bridge 보유종목 카드는 모두 등락률 오른쪽에 원본 `change_amount`를 같은 trend 색상으로 표시한다. `MarketSnapshot`에도 원본 `change_amount`를 함께 보존하고, `/api/bridge/kis-efriend/quote-universe`의 `monitor_snapshots`에도 그대로 전달하여 장마감 후 Market AI/Bridge 재시작에서도 최근 완료 KRX 거래일의 exact KIS durable snapshot으로 금액까지 복원한다. 과거 DB처럼 원본 `change_amount`가 실제로 없는 legacy snapshot은 퍼센트에서 역산하지 않고 금액 표시만 생략한다.
 - `monitor.css`는 non-blocking으로 로드하고 `index.html`에는 첫 화면을 읽을 수 있는 최소 critical style만 둔다. `/monitor/`, `index.html`, `monitor.css`, `monitor.js` 응답은 `Cache-Control: no-store` 계열 헤더를 강제해 Monitor를 열 때마다 최신 정적 파일을 다시 읽게 한다.

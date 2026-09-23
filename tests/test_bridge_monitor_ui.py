@@ -159,7 +159,7 @@ class WebMonitorContractTests(unittest.TestCase):
         self.assertLess(resolver.index("if (explicitStatus)"), resolver.index("isCashMarketClosed()"))
 
     def test_web_monitor_uses_backend_dashboard_metadata_and_semantic_status(self):
-        self.assertIn("const POLL_INTERVAL_MS = 10_000;", self.js_source)
+        self.assertIn("const POLL_INTERVAL_MS = 5_000;", self.js_source)
         self.assertIn('/api/bridge/kis-efriend/quote-universe', self.js_source)
         self.assertIn("payload?.dashboard_names", self.js_source)
         self.assertIn("payload?.dashboard_display_tickers ??", self.js_source)

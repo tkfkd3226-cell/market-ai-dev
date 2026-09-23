@@ -16,6 +16,8 @@ __pycache__/
 .pytest_cache/
 *.pyc
 *.pyo
+market-ai-environment.txt
+market-ai-test-result.txt
 
 # Keep native extension modules trackable. PyInstaller onedir runtimes may
 # require .pyd files under _internal/ and _suite_internal/.

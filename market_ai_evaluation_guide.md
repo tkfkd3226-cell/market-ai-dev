@@ -654,6 +654,29 @@ python tools/run-tests.py -q
 
 평가자는 `yfinance` 누락이 이미 확인된 동일 source-QA 환경에서 `pip install yfinance` 또는 `pip install -r requirements-test.txt`를 반복 시도하지 않는다. 새 dependency 변경이나 runtime 환경 변경 증거가 있을 때만 환경 준비 여부를 다시 확인한다.
 
+### 외부 Windows source-QA 결과를 평가 증빙으로 사용하는 경우
+
+평가 환경의 dependency 제약 때문에 정식 러너를 직접 끝까지 실행하지 못하더라도, 사용자가 **동일한 최신 source tree**에서 아래 PowerShell 명령으로 생성한 환경/테스트 결과를 ZIP에 함께 제공하면 source-QA 증빙으로 사용할 수 있다. 이 파일은 평가 증빙이며 repository tracked source일 필요는 없다.
+
+```powershell
+python --version > market-ai-environment.txt 2>&1
+python -m pip freeze >> market-ai-environment.txt 2>&1
+python tools/run-tests.py -q -ra > market-ai-test-result.txt 2>&1
+```
+
+PowerShell redirection 결과는 환경에 따라 UTF-16LE일 수 있으므로 평가자는 깨진 문자처럼 보인다는 이유로 증빙을 폐기하지 않고 올바른 encoding으로 읽는다.
+
+증빙 인정 조건은 다음과 같다.
+
+- `market-ai-environment.txt`에 실제 Python version과 `pip freeze`가 포함되어 있을 것
+- source-test direct dependency가 `requirements.txt` / `requirements-test.txt`의 지원 범위에 들어오는지 확인할 것
+- `market-ai-test-result.txt`가 `tools/run-tests.py` 실행 결과임을 확인할 수 있고 마지막에 pass/fail/skip 결과가 명확할 것
+- FAIL이 있으면 단순히 점수만 내리지 않고 실제 product defect인지 환경/테스트 문제인지 기존 원칙대로 구분할 것
+- 전체 PASS면 해당 source revision의 자동 source-QA는 PASS로 인정하되, PASS 숫자만으로 평가를 종료하지 않고 source/API/state/bounded Counterexample 검토는 계속할 것
+- 이 증빙은 **source-test 결과**이지 EXE/eFriend/Tailscale/Windows 권한을 포함한 runtime 실기 증빙으로 확대 해석하지 않을 것
+
+같은 ZIP에 위 두 파일이 있으면 평가자는 자신의 환경에서 이미 확인된 dependency 설치 실패를 반복하기보다 이 증빙을 우선 읽고, 필요한 정적·코드 흐름 검증만 보완한다.
+
 ## 14.3 Windows 실기
 
 source 평가와 runtime 실기는 구분한다. 실제 EXE/eFriend/Tailscale/Windows 권한 동작은 필요한 변경에서만 운영 PC에서 확인한다.

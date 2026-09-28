@@ -869,6 +869,26 @@ html.monitor-embedded .monitor-header__tools {
     -webkit-line-clamp: 2;
   }
 
+  /* Embedded Phone Holding Names · 상태 badge 예약폭은 첫 줄에만 적용한다.
+     두 번째 줄 아래의 실제 빈 폭까지 56px을 계속 차감하면 긴 ETF명이 불필요하게 ellipsis 처리된다. */
+  html.monitor-embedded .holding-card__identity h3 {
+    display: block;
+    overflow: hidden;
+    max-height: 40px;
+    padding-right: 0;
+    line-height: 20px;
+    text-overflow: clip;
+    -webkit-box-orient: initial;
+    -webkit-line-clamp: unset;
+  }
+
+  html.monitor-embedded .holding-card__identity h3::before {
+    content: "";
+    float: right;
+    width: 52px;
+    height: 20px;
+  }
+
   .holding-card__identity span[data-role="ticker"] {
     display: none;
   }

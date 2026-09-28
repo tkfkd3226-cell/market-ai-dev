@@ -123,6 +123,7 @@ class WebMonitorContractTests(unittest.TestCase):
         cls.build_source = BUILD_MARKET_AI.read_text(encoding="utf-8-sig")
         cls.index_source = (MONITOR_DIR / "index.html").read_text(encoding="utf-8-sig")
         cls.js_source = (MONITOR_DIR / "monitor.js").read_text(encoding="utf-8-sig")
+        cls.css_source = (MONITOR_DIR / "monitor.css").read_text(encoding="utf-8-sig")
 
     def test_monitor_runtime_assets_are_mounted_and_packaged(self):
         runtime_assets = {path.name for path in MONITOR_DIR.iterdir() if path.is_file()}
@@ -169,6 +170,19 @@ class WebMonitorContractTests(unittest.TestCase):
         self.assertIn('"시간외"', self.js_source)
         self.assertIn("hour > 23 || minute > 59 || second > 59", self.js_source)
         self.assertIn("resolveSessionLabel", self.js_source)
+
+
+    def test_embedded_phone_holding_name_uses_only_first_line_for_status_badge_reservation(self):
+        source = self.css_source
+        self.assertIn("html.monitor-embedded .holding-card__identity h3 {", source)
+        self.assertIn("max-height: 40px;", source)
+        self.assertIn("padding-right: 0;", source)
+        self.assertIn("line-height: 20px;", source)
+        self.assertIn("-webkit-line-clamp: unset;", source)
+        self.assertIn("html.monitor-embedded .holding-card__identity h3::before {", source)
+        self.assertIn("float: right;", source)
+        self.assertIn("width: 52px;", source)
+        self.assertIn("height: 20px;", source)
 
     def test_monitor_backend_reads_live_memory_without_renewing_dashboard_lease(self):
         self.assertIn("def monitor_quotes(", self.quote_source)

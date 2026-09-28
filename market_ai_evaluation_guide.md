@@ -677,6 +677,28 @@ PowerShell redirection 결과는 환경에 따라 UTF-16LE일 수 있으므로 �
 
 같은 ZIP에 위 두 파일이 있으면 평가자는 자신의 환경에서 이미 확인된 dependency 설치 실패를 반복하기보다 이 증빙을 우선 읽고, 필요한 정적·코드 흐름 검증만 보완한다.
 
+### 정식 source-QA 결과 선택 및 최종 표기 규칙
+
+위 외부 Windows 증빙이 인정 조건을 모두 만족하면 해당 결과를 그 source revision의 **canonical source-QA 결과**로 사용한다. 평가자 자신의 실행 환경에서 수행한 source-QA는 보조 교차검증(supplemental cross-check)으로만 취급한다.
+
+특히 다음 규칙을 적용한다.
+
+- 외부 Windows 결과가 `191 passed`처럼 FAIL/ERROR/SKIP 없이 전체 PASS이고, `market-ai-environment.txt`에서 `yfinance` 등 해당 테스트의 필수 dependency 설치가 확인되면 최종 평가의 source-QA 결과에는 **외부 Windows 전체 PASS 결과만 표기**한다.
+- 평가자 환경에서 `yfinance` 부재 때문에 `126 passed / 1 skipped`처럼 optional dependency SKIP이 발생하더라도, 동일 revision의 canonical Windows 결과에서 해당 영역까지 전체 PASS가 확인되었다면 그 SKIP은 **최종 점수표·요약·주의사항·한계사항에 별도로 기재하지 않는다.**
+- 평가자 환경의 optional SKIP은 내부적으로 코드 흐름과 비의존 테스트를 교차검증하기 위한 정보일 뿐이며, canonical 결과를 낮추거나 병기하지 않는다.
+- 단, 외부 Windows 결과 자체에 SKIP/FAIL/ERROR가 있거나 환경 파일에서 해당 dependency 설치 여부를 확인할 수 없으면 이 우선 규칙을 적용하지 않고 원인을 구분하여 평가한다.
+- 외부 Windows 결과와 평가자 환경 결과가 dependency 차이로 설명되지 않는 방식으로 충돌하면 무조건 외부 결과를 덮어쓰지 않고 source revision, 실행 명령, dependency 및 테스트 수집 범위를 먼저 대조한다.
+
+최종 표기 예시는 다음과 같다.
+
+```text
+사용자 Windows 증빙: 191 passed
+평가자 환경: 126 passed / 1 skipped (yfinance 미설치)
+
+→ 최종 평가 표기: Market AI source-QA: 191 passed — PASS
+→ 평가자 환경의 1 skipped는 최종 평가에 병기하지 않음
+```
+
 ## 14.3 Windows 실기
 
 source 평가와 runtime 실기는 구분한다. 실제 EXE/eFriend/Tailscale/Windows 권한 동작은 필요한 변경에서만 운영 PC에서 확인한다.

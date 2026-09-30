@@ -579,6 +579,20 @@ function resolveBusinessTime(snapshot) {
    ========================================================= */
 
 function resolveHoldingStatus(snapshot, marketState = "") {
+  // 구독 상태는 저장된 가격의 세션보다 우선한다. 미구독 대기와 실제 오류를 구분한다.
+  const subscriptionState = normalizeMarketState(snapshot?.subscription_state);
+  if (subscriptionState === "error") {
+    return STATUS.ERROR;
+  }
+  if (subscriptionState === "not_subscribed") {
+    return String(snapshot?.subscription_error ?? "").trim()
+      ? STATUS.ERROR
+      : STATUS.WARMING;
+  }
+  if (normalizeMarketState(firstDefined(snapshot?.state, snapshot?.status)) === "unavailable") {
+    return state.bridgeConnected ? STATUS.WARMING : STATUS.STALE;
+  }
+
   const explicitStatus = normalizeStatus(
     firstDefined(
       snapshot?.state,
